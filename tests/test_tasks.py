@@ -15,15 +15,17 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 
 from aplicacion.base_de_datos import Base, get_db
 from aplicacion.principal import app
 
-# Base de datos SQLite en memoria para los tests; aislada del entorno de producción
-SQLALCHEMY_TEST_DATABASE_URL = "sqlite:///:memory:"
-
+# StaticPool garantiza que todas las sesiones comparten la misma conexión en memoria;
+# sin él cada sesión abriría una conexión nueva y vería una base de datos vacía distinta
 engine_test = create_engine(
-    SQLALCHEMY_TEST_DATABASE_URL, connect_args={"check_same_thread": False}
+    "sqlite:///:memory:",
+    connect_args={"check_same_thread": False},
+    poolclass=StaticPool,
 )
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine_test)
 
@@ -37,20 +39,23 @@ def override_get_db():
         db.close()
 
 
-@pytest.fixture(autouse=True)
-def setup_database():
-    # Crea las tablas antes de cada test y las elimina al terminar
-    Base.metadata.create_all(bind=engine_test)
-    yield
-    Base.metadata.drop_all(bind=engine_test)
-
-
 @pytest.fixture
 def client():
-    # Cliente HTTP con la dependencia de BD sobreescrita
+    # 1. Crear tablas en el engine de test antes de instanciar el TestClient;
+    #    principal.py ya no llama create_all al importarse (usa lifespan),
+    #    así que aquí tenemos control total sobre qué engine se usa
+    Base.metadata.create_all(bind=engine_test)
+
+    # 2. Sobreescribir la dependencia de BD para que todas las peticiones usen engine_test
     app.dependency_overrides[get_db] = override_get_db
+
+    # 3. TestClient sin context manager: no dispara el lifespan de la app,
+    #    evitando que el create_all de producción interfiera con engine_test
     yield TestClient(app)
+
+    # 4. Limpieza al terminar cada test
     app.dependency_overrides.clear()
+    Base.metadata.drop_all(bind=engine_test)
 
 
 # ---------------------------------------------------------------------------
