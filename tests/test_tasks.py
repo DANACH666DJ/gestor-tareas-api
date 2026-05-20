@@ -62,6 +62,7 @@ def test_actualizar_status_tarea_completada_devuelve_400(client):
     response = client.patch(f"/tasks/{task_id}", json={"status": "pending"})
 
     assert response.status_code == 400
+    assert "completada" in response.json()["detail"].lower()
 
 
 def test_actualizar_descripcion_tarea_completada_devuelve_400(client):
@@ -72,6 +73,7 @@ def test_actualizar_descripcion_tarea_completada_devuelve_400(client):
     )
 
     assert response.status_code == 400
+    assert "completada" in response.json()["detail"].lower()
 
 
 def test_tarea_no_completada_se_puede_actualizar(client):
