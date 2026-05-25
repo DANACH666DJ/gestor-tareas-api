@@ -22,9 +22,13 @@ def list_tasks(db: Session = Depends(get_db)):
 # Devuelve una tarea por su identificador; 404 si no existe
 @router.get("/{task_id}", response_model=TaskResponse)
 def get_task(task_id: int, db: Session = Depends(get_db)):
+    # Buscar tarea por id y devolver 404 si no existe
+    if task_id <= 0:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid task id")
     task = db.query(Task).filter(Task.id == task_id).first()
-    if not task:
+    if task is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
+
     return task
 
 
@@ -47,8 +51,11 @@ def create_task(payload: TaskCreate, db: Session = Depends(get_db)):
 # Actualiza parcialmente una tarea; solo modifica los campos enviados en el cuerpo
 @router.patch("/{task_id}", response_model=TaskResponse)
 def update_task(task_id: int, payload: TaskUpdate, db: Session = Depends(get_db)):
+    # Buscar tarea por id y devolver 404 si no existe
+    if task_id <= 0:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid task id")
     task = db.query(Task).filter(Task.id == task_id).first()
-    if not task:
+    if task is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
 
     # Una tarea ya completada no puede modificarse posteriormente
@@ -68,8 +75,12 @@ def update_task(task_id: int, payload: TaskUpdate, db: Session = Depends(get_db)
 # Elimina una tarea de la base de datos; devuelve 204 sin cuerpo
 @router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_task(task_id: int, db: Session = Depends(get_db)):
+    # Buscar tarea por id y devolver 404 si no existe
+    if task_id <= 0:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid task id")
     task = db.query(Task).filter(Task.id == task_id).first()
-    if not task:
+    if task is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
+
     db.delete(task)
     db.commit()
