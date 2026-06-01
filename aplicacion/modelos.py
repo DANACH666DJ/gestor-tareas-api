@@ -22,6 +22,7 @@ class Task(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(255), nullable=False)
     description = Column(String, nullable=True)
+    categoria = Column(String(100), nullable=True)
     status = Column(Enum(TaskStatus), default=TaskStatus.pending, nullable=False)
     # La fecha de creación se asigna automáticamente al insertar el registro
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)

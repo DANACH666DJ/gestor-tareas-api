@@ -37,6 +37,12 @@ def create_task(payload: TaskCreate, db: Session = Depends(get_db)):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="El título debe tener al menos 3 caracteres",
         )
+    # Valida que la categoría tenga al menos 2 caracteres si se proporciona
+    if payload.categoria is not None and len(payload.categoria.strip()) < 2:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="La categoría debe tener al menos 2 caracteres",
+        )
     task = Task(**payload.model_dump())
     db.add(task)
     db.commit()

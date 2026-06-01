@@ -83,12 +83,15 @@ Cada tarea tiene la siguiente estructura de respuesta:
   "id": 1,
   "title": "Revisar documentación",
   "description": "Actualizar el README del proyecto",
+  "categoria": "Documentación",
   "status": "pending",
   "created_at": "2025-05-27T14:00:00"
 }
 ```
 
 Los valores válidos para `status` son: `pending`, `in_progress` y `done`.
+
+El campo `categoria` es opcional (puede ser `null`) y, si se proporciona, debe tener al menos 2 caracteres. Longitud máxima: 100 caracteres.
 
 ---
 
@@ -114,6 +117,7 @@ curl http://127.0.0.1:8000/tasks/
     "id": 1,
     "title": "Revisar documentación",
     "description": "Actualizar el README del proyecto",
+    "categoria": "Documentación",
     "status": "pending",
     "created_at": "2025-05-27T14:00:00"
   },
@@ -121,6 +125,7 @@ curl http://127.0.0.1:8000/tasks/
     "id": 2,
     "title": "Corregir bug de login",
     "description": null,
+    "categoria": null,
     "status": "in_progress",
     "created_at": "2025-05-27T15:30:00"
   }
@@ -171,14 +176,14 @@ curl http://127.0.0.1:8000/tasks/1
 |---|---|
 | **Método** | `POST` |
 | **Ruta** | `/tasks/` |
-| **Cuerpo (JSON)** | `title` (str, obligatorio, mínimo 3 caracteres), `description` (str, opcional), `status` (str, opcional, por defecto `"pending"`) |
+| **Cuerpo (JSON)** | `title` (str, obligatorio, mínimo 3 caracteres), `description` (str, opcional), `categoria` (str, opcional, mínimo 2 caracteres, máximo 100), `status` (str, opcional, por defecto `"pending"`) |
 
 **Ejemplo curl:**
 
 ```bash
 curl -X POST http://127.0.0.1:8000/tasks/ \
   -H "Content-Type: application/json" \
-  -d '{"title": "Desplegar en producción", "description": "Subir la versión 2.0"}'
+  -d '{"title": "Desplegar en producción", "description": "Subir la versión 2.0", "categoria": "DevOps"}'
 ```
 
 **Ejemplo de respuesta** (`201 Created`):
@@ -188,6 +193,7 @@ curl -X POST http://127.0.0.1:8000/tasks/ \
   "id": 3,
   "title": "Desplegar en producción",
   "description": "Subir la versión 2.0",
+  "categoria": "DevOps",
   "status": "pending",
   "created_at": "2025-05-27T16:00:00"
 }
@@ -201,6 +207,14 @@ curl -X POST http://127.0.0.1:8000/tasks/ \
 }
 ```
 
+**Respuesta de error** (`400 Bad Request`) — categoría con menos de 2 caracteres:
+
+```json
+{
+  "detail": "La categoría debe tener al menos 2 caracteres"
+}
+```
+
 ---
 
 ### 4. Actualizar parcialmente una tarea
@@ -210,7 +224,7 @@ curl -X POST http://127.0.0.1:8000/tasks/ \
 | **Método** | `PATCH` |
 | **Ruta** | `/tasks/{task_id}` |
 | **Parámetros de ruta** | `task_id` (int) — Identificador de la tarea |
-| **Cuerpo (JSON)** | `title` (str, opcional), `description` (str, opcional), `status` (str, opcional) |
+| **Cuerpo (JSON)** | `title` (str, opcional), `description` (str, opcional), `categoria` (str, opcional), `status` (str, opcional) |
 
 Solo se modifican los campos incluidos en el cuerpo de la petición. No se permite modificar una tarea cuyo estado sea `done`.
 
@@ -229,6 +243,7 @@ curl -X PATCH http://127.0.0.1:8000/tasks/1 \
   "id": 1,
   "title": "Revisar documentación",
   "description": "Actualizar el README del proyecto",
+  "categoria": "Documentación",
   "status": "in_progress",
   "created_at": "2025-05-27T14:00:00"
 }
@@ -301,6 +316,8 @@ gestor-tareas-api/
 │   └── rutas/                  # Paquete de endpoints agrupados por recurso
 │       ├── __init__.py
 │       └── tareas.py           # Endpoints REST para la gestión de tareas
+├── scripts/                    # Scripts de utilidad y migración
+│   └── add_categoria_column.py # Migración: añade la columna categoria a la tabla tasks
 ├── tests/                      # Suite de tests automatizados
 │   ├── __init__.py
 │   └── test_tasks.py           # Tests de integración con pytest y SQLite en memoria
