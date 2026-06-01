@@ -84,11 +84,14 @@ Cada tarea tiene la siguiente estructura de respuesta:
   "title": "Revisar documentación",
   "description": "Actualizar el README del proyecto",
   "status": "pending",
+  "priority": "medium",
   "created_at": "2025-05-27T14:00:00"
 }
 ```
 
 Los valores válidos para `status` son: `pending`, `in_progress` y `done`.
+
+Los valores válidos para `priority` son: `low`, `medium` y `high` (por defecto `medium`).
 
 ---
 
@@ -98,7 +101,7 @@ Los valores válidos para `status` son: `pending`, `in_progress` y `done`.
 |---|---|
 | **Método** | `GET` |
 | **Ruta** | `/tasks/` |
-| **Parámetros** | Ninguno |
+| **Parámetros de query** | `priority` (str, opcional) — Filtra por prioridad (`low`, `medium`, `high`) |
 
 **Ejemplo curl:**
 
@@ -115,6 +118,7 @@ curl http://127.0.0.1:8000/tasks/
     "title": "Revisar documentación",
     "description": "Actualizar el README del proyecto",
     "status": "pending",
+    "priority": "medium",
     "created_at": "2025-05-27T14:00:00"
   },
   {
@@ -122,6 +126,7 @@ curl http://127.0.0.1:8000/tasks/
     "title": "Corregir bug de login",
     "description": null,
     "status": "in_progress",
+    "priority": "high",
     "created_at": "2025-05-27T15:30:00"
   }
 ]
@@ -151,6 +156,7 @@ curl http://127.0.0.1:8000/tasks/1
   "title": "Revisar documentación",
   "description": "Actualizar el README del proyecto",
   "status": "pending",
+  "priority": "medium",
   "created_at": "2025-05-27T14:00:00"
 }
 ```
@@ -171,7 +177,7 @@ curl http://127.0.0.1:8000/tasks/1
 |---|---|
 | **Método** | `POST` |
 | **Ruta** | `/tasks/` |
-| **Cuerpo (JSON)** | `title` (str, obligatorio, mínimo 3 caracteres), `description` (str, opcional), `status` (str, opcional, por defecto `"pending"`) |
+| **Cuerpo (JSON)** | `title` (str, obligatorio, mínimo 3 caracteres), `description` (str, opcional), `status` (str, opcional, por defecto `"pending"`), `priority` (str, opcional, por defecto `"medium"`: `low`, `medium`, `high`) |
 
 **Ejemplo curl:**
 
@@ -189,6 +195,7 @@ curl -X POST http://127.0.0.1:8000/tasks/ \
   "title": "Desplegar en producción",
   "description": "Subir la versión 2.0",
   "status": "pending",
+  "priority": "medium",
   "created_at": "2025-05-27T16:00:00"
 }
 ```
@@ -210,7 +217,7 @@ curl -X POST http://127.0.0.1:8000/tasks/ \
 | **Método** | `PATCH` |
 | **Ruta** | `/tasks/{task_id}` |
 | **Parámetros de ruta** | `task_id` (int) — Identificador de la tarea |
-| **Cuerpo (JSON)** | `title` (str, opcional), `description` (str, opcional), `status` (str, opcional) |
+| **Cuerpo (JSON)** | `title` (str, opcional), `description` (str, opcional), `status` (str, opcional), `priority` (str, opcional: `low`, `medium`, `high`) |
 
 Solo se modifican los campos incluidos en el cuerpo de la petición. No se permite modificar una tarea cuyo estado sea `done`.
 
@@ -230,6 +237,7 @@ curl -X PATCH http://127.0.0.1:8000/tasks/1 \
   "title": "Revisar documentación",
   "description": "Actualizar el README del proyecto",
   "status": "in_progress",
+  "priority": "medium",
   "created_at": "2025-05-27T14:00:00"
 }
 ```
