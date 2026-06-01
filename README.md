@@ -210,9 +210,9 @@ curl -X POST http://127.0.0.1:8000/tasks/ \
 | **Método** | `PATCH` |
 | **Ruta** | `/tasks/{task_id}` |
 | **Parámetros de ruta** | `task_id` (int) — Identificador de la tarea |
-| **Cuerpo (JSON)** | `title` (str, opcional), `description` (str, opcional), `status` (str, opcional) |
+| **Cuerpo (JSON)** | `title` (str, opcional, mínimo 3 caracteres), `description` (str, opcional), `status` (str, opcional) |
 
-Solo se modifican los campos incluidos en el cuerpo de la petición. No se permite modificar una tarea cuyo estado sea `done`.
+Solo se modifican los campos incluidos en el cuerpo de la petición. No se permite modificar una tarea cuyo estado sea `done`. Si se envía un título con menos de 3 caracteres, se devuelve `422 Unprocessable Entity`.
 
 **Ejemplo curl:**
 
@@ -247,6 +247,14 @@ curl -X PATCH http://127.0.0.1:8000/tasks/1 \
 ```json
 {
   "detail": "No se puede modificar una tarea ya completada"
+}
+```
+
+**Respuesta de error** (`422 Unprocessable Entity`) — título con menos de 3 caracteres:
+
+```json
+{
+  "detail": "El título debe tener al menos 3 caracteres"
 }
 ```
 
