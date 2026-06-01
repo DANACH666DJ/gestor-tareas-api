@@ -47,6 +47,11 @@ def create_task(payload: TaskCreate, db: Session = Depends(get_db)):
 # Actualiza parcialmente una tarea; solo modifica los campos enviados en el cuerpo
 @router.patch("/{task_id}", response_model=TaskResponse)
 def update_task(task_id: int, payload: TaskUpdate, db: Session = Depends(get_db)):
+    """Actualiza parcialmente una tarea existente.
+
+    Devuelve 404 si la tarea no existe, 400 si ya está completada y
+    422 si el título proporcionado tiene menos de 3 caracteres.
+    """
     task = db.query(Task).filter(Task.id == task_id).first()
     if not task:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
@@ -56,6 +61,13 @@ def update_task(task_id: int, payload: TaskUpdate, db: Session = Depends(get_db)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="No se puede modificar una tarea ya completada",
+        )
+
+    # Valida que el título tenga al menos 3 caracteres si se envía en el payload
+    if payload.title is not None and len(payload.title.strip()) < 3:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="El título debe tener al menos 3 caracteres",
         )
 
     for field, value in payload.model_dump(exclude_unset=True).items():
