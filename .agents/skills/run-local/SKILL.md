@@ -19,7 +19,7 @@ description: Arrancar la API localmente, verificar que responde y ejecutar una p
 
 1. Comprueba que la API responde: `curl http://localhost:8000/tasks/`
 2. Crea una tarea de prueba:
-  `curl -X POST http://localhost:8000/tasks/ -H "Content-Type: application/json" -d "{\"title\": \"Test skill\"}"`
+   `curl -X POST http://localhost:8000/tasks/ -H "Content-Type: application/json" -d "{\"title\": \"Test skill\"}"`
 3. Verifica que la tarea aparece en el listado
 4. Elimina la tarea de prueba
 
