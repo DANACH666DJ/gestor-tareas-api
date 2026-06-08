@@ -252,7 +252,53 @@ curl -X PATCH http://127.0.0.1:8000/tasks/1 \
 
 ---
 
-### 5. Eliminar una tarea
+### 5. Marcar una tarea como completada
+
+| | |
+|---|---|
+| **Método** | `PATCH` |
+| **Ruta** | `/tasks/{task_id}/complete` |
+| **Parámetros de ruta** | `task_id` (int) — Identificador de la tarea |
+
+Cambia el estado de la tarea a `done`. No requiere cuerpo en la petición. No se permite completar una tarea que ya esté en estado `done`.
+
+**Ejemplo curl:**
+
+```bash
+curl -X PATCH http://127.0.0.1:8000/tasks/1/complete
+```
+
+**Ejemplo de respuesta** (`200 OK`):
+
+```json
+{
+  "id": 1,
+  "title": "Revisar documentación",
+  "description": "Actualizar el README del proyecto",
+  "status": "done",
+  "created_at": "2025-05-27T14:00:00"
+}
+```
+
+**Respuesta de error** (`404 Not Found`):
+
+```json
+{
+  "detail": "Task not found"
+}
+```
+
+**Respuesta de error** (`400 Bad Request`) — tarea ya completada:
+
+```json
+{
+  "detail": "La tarea ya está completada"
+}
+```
+
+---
+
+### 6. Eliminar una tarea
 
 | | |
 |---|---|

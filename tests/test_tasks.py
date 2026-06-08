@@ -165,6 +165,47 @@ def test_update_done_task_blocked():
     assert response.json()["detail"] == "No se puede modificar una tarea ya completada"
 
 
+# ─── PATCH /tasks/{id}/complete ────────────────────────────────────────────────
+
+def test_complete_task_happy_path():
+    """Marca una tarea pendiente como completada y verifica el estado 'done'."""
+    create_resp = client.post("/tasks/", json={"title": "Tarea por completar"})
+    task_id = create_resp.json()["id"]
+    response = client.patch(f"/tasks/{task_id}/complete")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "done"
+    assert data["id"] == task_id
+
+
+def test_complete_task_from_in_progress():
+    """Marca una tarea en progreso como completada."""
+    create_resp = client.post(
+        "/tasks/", json={"title": "Tarea en progreso", "status": "in_progress"}
+    )
+    task_id = create_resp.json()["id"]
+    response = client.patch(f"/tasks/{task_id}/complete")
+    assert response.status_code == 200
+    assert response.json()["status"] == "done"
+
+
+def test_complete_task_already_done():
+    """Intentar completar una tarea ya completada devuelve 400."""
+    create_resp = client.post("/tasks/", json={"title": "Tarea ya hecha"})
+    task_id = create_resp.json()["id"]
+    client.patch(f"/tasks/{task_id}/complete")
+    response = client.patch(f"/tasks/{task_id}/complete")
+    assert response.status_code == 400
+    assert response.json()["detail"] == "La tarea ya está completada"
+
+
+def test_complete_task_not_found():
+    """Intentar completar una tarea inexistente devuelve 404."""
+    response = client.patch("/tasks/9999/complete")
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Task not found"
+
+
 # ─── DELETE /tasks/{id} ───────────────────────────────────────────────────────
 
 def test_delete_task():
